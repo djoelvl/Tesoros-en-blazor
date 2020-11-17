@@ -1,0 +1,76 @@
+@using Data
+@using misTesoros.Services
+@inject ITesoroService TS
+
+<div>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Valor</th>
+            <th>Descripción</th>
+            <th>Peso</th>
+            <th>Lugar</th>
+            <th>Imagen</th>
+        </thead>
+        <tbody>
+            @if(treasures.Count > 0){
+                @foreach (Treasure T in treasures)
+                {
+                <tr>
+                    <td>@T.Name</td>
+                    <td>@T.Date.Day / @T.Date.Month / @T.Date.Year </td>
+                    <td>@T.Value</td>
+                    <td>@T.Description</td>
+                    <td>@T.Weigth</td>
+                    <td>@T.Place</td>
+                    <td>@if(images){
+    <div class="text-center">
+        <img width="150px" src="@T.UrlRef" alt="imagen">
+    </div>
+        }
+        </td>
+
+                </tr>   
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+@code 
+{
+    [Parameter]
+    public Guid Uid {get; set;}
+    [Parameter]
+    public EventCallback ChangeRL {get; set;}
+
+    private bool images = true;
+
+    List<Treasure> treasures = new List<Treasure>();
+    Treasure ModalT = new Treasure();
+    private string modalId = "tesoroModalDetalle";
+    private void SetTreasureModal(Treasure t){
+        ModalT = t;
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await Load();
+        StateHasChanged();    
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        StateHasChanged();
+        await Load();
+    }
+
+    private async Task Load(){
+            if(Uid != null)
+            treasures = await TS.GetAllTreasure(Uid);
+    }
+
+    
+}

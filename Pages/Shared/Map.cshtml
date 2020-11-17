@@ -1,0 +1,107 @@
+@page "/Map"
+@using Newtonsoft.Json;
+@namespace TAREA4.Pages
+@using System.Drawing
+@using misTesoros.Data
+@using Microsoft.JSInterop
+@using misTesoros.Services
+@inject ITesoroService TS
+@inject IJSRuntime runtime
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa</title>
+    <link rel="stylesheet" href="../css\site.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    
+<style>
+    
+</style>
+
+
+</head>
+<body>
+
+        <div class="mapa">
+       
+     <input class="btn btn-dark" type="button" onclick="history.back()" value="Salir del mapa">
+    
+    <h4>Mapa de Accidentes</h4>
+     </div>
+    <div id="map">
+
+    </div>
+
+
+    <script>
+
+var map = L.map('map').setView([18.66, -69.80], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+
+
+
+
+         
+ 
+            for(Treasure T in treasures)
+                {
+             if(k.AccidenteId != null){
+    L.marker([k.Latitud, k.Longitud]).addTo(map)
+    .bindPopup('<strong>Lugar: </strong>'+k.Lugar+'<br><strong>Descripcion: </strong>'+k.Descripcion+
+    '<br><strong>Fecha: </strong>'+k.Fecha+'<br><strong>Hora: </strong>'+k.Hora+'<br><strong>Latitud :</strong>'+k.Latitud+
+    '<br><strong>Longitud:</strong>'+k.Longitud)
+    .openPopup();    
+}
+}
+
+    </script>
+
+
+</body>
+</html>
+
+@code{
+   [Parameter]
+    public Guid Uid {get; set;}
+    [Parameter]
+    public EventCallback ChangeRL {get; set;}
+
+    private bool images = true;
+
+    List<Treasure> treasures = new List<Treasure>();
+    Treasure ModalT = new Treasure();
+    private string modalId = "tesoroModalDetalle";
+    private void SetTreasureModal(Treasure t){
+        ModalT = t;
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await Load();
+        StateHasChanged();    
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        StateHasChanged();
+        await Load();
+    }
+
+    private async Task Load(){
+            if(Uid != null)
+            treasures = await TS.GetAllTreasure(Uid);
+    }
+
+ 
+
+}
